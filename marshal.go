@@ -5,12 +5,13 @@ import (
 	"os"
 	"reflect"
 	"time"
+	"sort"
 
 	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
 )
 
-// EventToProtocolBuffer converts an Event type to a proto.Event
+// convert an event to a protobuf Event
 func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	if event.Host == "" {
 		event.Host, _ = os.Hostname()
@@ -20,126 +21,53 @@ func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	}
 
 	var e proto.Event
-	t := reflect.ValueOf(&e).Elem()
-	s := reflect.ValueOf(event).Elem()
-	typeOfEvent := s.Type()
+	e.Host = pb.String(event.Host)
+	e.Time = pb.Int64(event.Time)
+	if event.Service != "" {
+		e.Service = pb.String(event.Service)
+	}
 
-	for i := 0; i < s.NumField(); i++ {
-		f := s.Field(i)
-		value := reflect.ValueOf(f.Interface())
-		if reflect.Zero(f.Type()) != value && f.Interface() != nil {
-			name := typeOfEvent.Field(i).Name
-			switch name {
-			case "State", "Service", "Host", "Description":
-				tmp := reflect.ValueOf(pb.String(value.String()))
-				t.FieldByName(name).Set(tmp)
-			case "Ttl":
-				tmp := reflect.ValueOf(pb.Float32(float32(value.Float())))
-				t.FieldByName(name).Set(tmp)
-			case "Time":
-				tmp := reflect.ValueOf(pb.Int64(value.Int()))
-				t.FieldByName(name).Set(tmp)
-			case "Tags":
-				tmp := reflect.ValueOf(value.Interface().([]string))
-				t.FieldByName(name).Set(tmp)
-			case "Metric":
-				switch reflect.TypeOf(f.Interface()).Kind() {
-				case reflect.Int:
-					tmp := reflect.ValueOf(pb.Int64(int64(value.Int())))
-					t.FieldByName("MetricSint64").Set(tmp)
-				case reflect.Float32:
-					tmp := reflect.ValueOf(pb.Float32(float32(value.Float())))
-					t.FieldByName("MetricF").Set(tmp)
-				case reflect.Float64:
-					tmp := reflect.ValueOf(pb.Float64(value.Float()))
-					t.FieldByName("MetricD").Set(tmp)
-				default:
-					return nil, fmt.Errorf("Metric of invalid type (type %v)",
-						reflect.TypeOf(f.Interface()).Kind())
-				}
-			case "Attributes":
-				var attrs []*proto.Attribute
-				for k, v := range value.Interface().(map[string]string) {
-					k_, v_ := k, v
-					attrs = append(attrs, &proto.Attribute{
-						Key:   &k_,
-						Value: &v_,
-					})
-				}
-				t.FieldByName(name).Set(reflect.ValueOf(attrs))
-			}
-		}
+	if event.State != "" {
+		e.State = pb.String(event.State)
+	}
+	if event.Description != "" {
+		e.Description = pb.String(event.Description)
+	}
+	e.Tags = event.Tags
+	var attrs []*proto.Attribute
+
+	// sort keys
+	var keys []string
+	for key := range event.Attributes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		attrs = append(attrs, &proto.Attribute{
+			Key:   pb.String(key),
+			Value: pb.String(event.Attributes[key]),
+		})
+	}
+	e.Attributes = attrs
+	if event.Ttl != 0 {
+		e.Ttl = pb.Float32(event.Ttl)
+	}
+
+	switch reflect.TypeOf(event.Metric).Kind() {
+	case reflect.Int:
+		e.MetricSint64 = pb.Int64((reflect.ValueOf(event.Metric).Int()))
+	case reflect.Float32:
+		e.MetricD = pb.Float64((reflect.ValueOf(event.Metric).Float()))
+	case reflect.Float64:
+		e.MetricD = pb.Float64((reflect.ValueOf(event.Metric).Float()))
+	default:
+		return nil, fmt.Errorf("Metric of invalid type (type %v)",
+			reflect.TypeOf(event.Metric).Kind())
 	}
 	return &e, nil
 }
 
-// StateToProtocolBuffer converts a State type to a proto.State
-func StateToProtocolBuffer(state *State) (*proto.State, error) {
-	if state.Host == "" {
-		state.Host, _ = os.Hostname()
-	}
-	if state.Time == 0 {
-		state.Time = time.Now().Unix()
-	}
-
-	var e proto.State
-	t := reflect.ValueOf(&e).Elem()
-	s := reflect.ValueOf(state).Elem()
-	typeOfEvent := s.Type()
-
-	for i := 0; i < s.NumField(); i++ {
-		f := s.Field(i)
-		value := reflect.ValueOf(f.Interface())
-		if reflect.Zero(f.Type()) != value && f.Interface() != nil {
-			name := typeOfEvent.Field(i).Name
-			switch name {
-			case "State", "Service", "Host", "Description":
-				tmp := reflect.ValueOf(pb.String(value.String()))
-				t.FieldByName(name).Set(tmp)
-			case "Once":
-				tmp := reflect.ValueOf(pb.Bool(bool(value.Bool())))
-				t.FieldByName(name).Set(tmp)
-			case "Ttl":
-				tmp := reflect.ValueOf(pb.Float32(float32(value.Float())))
-				t.FieldByName(name).Set(tmp)
-			case "Time":
-				tmp := reflect.ValueOf(pb.Int64(value.Int()))
-				t.FieldByName(name).Set(tmp)
-			case "Tags":
-				tmp := reflect.ValueOf(value.Interface().([]string))
-				t.FieldByName(name).Set(tmp)
-			case "Metric":
-				switch reflect.TypeOf(f.Interface()).Kind() {
-				case reflect.Int:
-					tmp := reflect.ValueOf(pb.Int64(int64(value.Int())))
-					t.FieldByName("MetricSint64").Set(tmp)
-				case reflect.Float32:
-					tmp := reflect.ValueOf(pb.Float32(float32(value.Float())))
-					t.FieldByName("MetricF").Set(tmp)
-				case reflect.Float64:
-					tmp := reflect.ValueOf(pb.Float64(value.Float()))
-					t.FieldByName("MetricD").Set(tmp)
-				default:
-					return nil, fmt.Errorf("Metric of invalid type (type %v)",
-						reflect.TypeOf(f.Interface()).Kind())
-				}
-			case "Attributes":
-				var attrs []*proto.Attribute
-				for k, v := range value.Interface().(map[string]string) {
-					k_, v_ := k, v
-					attrs = append(attrs, &proto.Attribute{
-						Key:   &k_,
-						Value: &v_,
-					})
-				}
-				t.FieldByName(name).Set(reflect.ValueOf(attrs))
-			}
-		}
-	}
-	return &e, nil
-}
-
-// ProtocolBuffersToEvents converts an array of proto.Event to an array of Event
+// converts an array of proto.Event to an array of Event
 func ProtocolBuffersToEvents(pbEvents []*proto.Event) []Event {
 	var events []Event
 	for _, event := range pbEvents {

@@ -2,16 +2,35 @@
 // source: proto.proto
 // DO NOT EDIT!
 
+/*
+Package proto is a generated protocol buffer package.
+
+It is generated from these files:
+	proto.proto
+
+It has these top-level messages:
+	State
+	Event
+	Query
+	Msg
+	Attribute
+*/
 package proto
 
 import proto1 "github.com/golang/protobuf/proto"
-import json "encoding/json"
+import fmt "fmt"
 import math "math"
 
-// Reference proto, json, and math imports to suppress error if they are not otherwise used.
+// Reference imports to suppress errors if they are not otherwise used.
 var _ = proto1.Marshal
-var _ = &json.SyntaxError{}
+var _ = fmt.Errorf
 var _ = math.Inf
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto1.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type State struct {
 	Time             *int64   `protobuf:"varint,1,opt,name=time" json:"time,omitempty"`
@@ -25,62 +44,63 @@ type State struct {
 	XXX_unrecognized []byte   `json:"-"`
 }
 
-func (this *State) Reset()         { *this = State{} }
-func (this *State) String() string { return proto1.CompactTextString(this) }
-func (*State) ProtoMessage()       {}
+func (m *State) Reset()                    { *m = State{} }
+func (m *State) String() string            { return proto1.CompactTextString(m) }
+func (*State) ProtoMessage()               {}
+func (*State) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (this *State) GetTime() int64 {
-	if this != nil && this.Time != nil {
-		return *this.Time
+func (m *State) GetTime() int64 {
+	if m != nil && m.Time != nil {
+		return *m.Time
 	}
 	return 0
 }
 
-func (this *State) GetState() string {
-	if this != nil && this.State != nil {
-		return *this.State
+func (m *State) GetState() string {
+	if m != nil && m.State != nil {
+		return *m.State
 	}
 	return ""
 }
 
-func (this *State) GetService() string {
-	if this != nil && this.Service != nil {
-		return *this.Service
+func (m *State) GetService() string {
+	if m != nil && m.Service != nil {
+		return *m.Service
 	}
 	return ""
 }
 
-func (this *State) GetHost() string {
-	if this != nil && this.Host != nil {
-		return *this.Host
+func (m *State) GetHost() string {
+	if m != nil && m.Host != nil {
+		return *m.Host
 	}
 	return ""
 }
 
-func (this *State) GetDescription() string {
-	if this != nil && this.Description != nil {
-		return *this.Description
+func (m *State) GetDescription() string {
+	if m != nil && m.Description != nil {
+		return *m.Description
 	}
 	return ""
 }
 
-func (this *State) GetOnce() bool {
-	if this != nil && this.Once != nil {
-		return *this.Once
+func (m *State) GetOnce() bool {
+	if m != nil && m.Once != nil {
+		return *m.Once
 	}
 	return false
 }
 
-func (this *State) GetTags() []string {
-	if this != nil {
-		return this.Tags
+func (m *State) GetTags() []string {
+	if m != nil {
+		return m.Tags
 	}
 	return nil
 }
 
-func (this *State) GetTtl() float32 {
-	if this != nil && this.Ttl != nil {
-		return *this.Ttl
+func (m *State) GetTtl() float32 {
+	if m != nil && m.Ttl != nil {
+		return *m.Ttl
 	}
 	return 0
 }
@@ -100,83 +120,84 @@ type Event struct {
 	XXX_unrecognized []byte       `json:"-"`
 }
 
-func (this *Event) Reset()         { *this = Event{} }
-func (this *Event) String() string { return proto1.CompactTextString(this) }
-func (*Event) ProtoMessage()       {}
+func (m *Event) Reset()                    { *m = Event{} }
+func (m *Event) String() string            { return proto1.CompactTextString(m) }
+func (*Event) ProtoMessage()               {}
+func (*Event) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
-func (this *Event) GetTime() int64 {
-	if this != nil && this.Time != nil {
-		return *this.Time
+func (m *Event) GetTime() int64 {
+	if m != nil && m.Time != nil {
+		return *m.Time
 	}
 	return 0
 }
 
-func (this *Event) GetState() string {
-	if this != nil && this.State != nil {
-		return *this.State
+func (m *Event) GetState() string {
+	if m != nil && m.State != nil {
+		return *m.State
 	}
 	return ""
 }
 
-func (this *Event) GetService() string {
-	if this != nil && this.Service != nil {
-		return *this.Service
+func (m *Event) GetService() string {
+	if m != nil && m.Service != nil {
+		return *m.Service
 	}
 	return ""
 }
 
-func (this *Event) GetHost() string {
-	if this != nil && this.Host != nil {
-		return *this.Host
+func (m *Event) GetHost() string {
+	if m != nil && m.Host != nil {
+		return *m.Host
 	}
 	return ""
 }
 
-func (this *Event) GetDescription() string {
-	if this != nil && this.Description != nil {
-		return *this.Description
+func (m *Event) GetDescription() string {
+	if m != nil && m.Description != nil {
+		return *m.Description
 	}
 	return ""
 }
 
-func (this *Event) GetTags() []string {
-	if this != nil {
-		return this.Tags
+func (m *Event) GetTags() []string {
+	if m != nil {
+		return m.Tags
 	}
 	return nil
 }
 
-func (this *Event) GetTtl() float32 {
-	if this != nil && this.Ttl != nil {
-		return *this.Ttl
+func (m *Event) GetTtl() float32 {
+	if m != nil && m.Ttl != nil {
+		return *m.Ttl
 	}
 	return 0
 }
 
-func (this *Event) GetAttributes() []*Attribute {
-	if this != nil {
-		return this.Attributes
+func (m *Event) GetAttributes() []*Attribute {
+	if m != nil {
+		return m.Attributes
 	}
 	return nil
 }
 
-func (this *Event) GetMetricSint64() int64 {
-	if this != nil && this.MetricSint64 != nil {
-		return *this.MetricSint64
+func (m *Event) GetMetricSint64() int64 {
+	if m != nil && m.MetricSint64 != nil {
+		return *m.MetricSint64
 	}
 	return 0
 }
 
-func (this *Event) GetMetricD() float64 {
-	if this != nil && this.MetricD != nil {
-		return *this.MetricD
+func (m *Event) GetMetricD() float64 {
+	if m != nil && m.MetricD != nil {
+		return *m.MetricD
 	}
 	return 0
 }
 
-func (this *Event) GetMetricF() float32 {
-	if this != nil && this.MetricF != nil {
-		return *this.MetricF
+func (m *Event) GetMetricF() float32 {
+	if m != nil && m.MetricF != nil {
+		return *m.MetricF
 	}
 	return 0
 }
@@ -186,13 +207,14 @@ type Query struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (this *Query) Reset()         { *this = Query{} }
-func (this *Query) String() string { return proto1.CompactTextString(this) }
-func (*Query) ProtoMessage()       {}
+func (m *Query) Reset()                    { *m = Query{} }
+func (m *Query) String() string            { return proto1.CompactTextString(m) }
+func (*Query) ProtoMessage()               {}
+func (*Query) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
-func (this *Query) GetString_() string {
-	if this != nil && this.String_ != nil {
-		return *this.String_
+func (m *Query) GetString_() string {
+	if m != nil && m.String_ != nil {
+		return *m.String_
 	}
 	return ""
 }
@@ -206,41 +228,42 @@ type Msg struct {
 	XXX_unrecognized []byte   `json:"-"`
 }
 
-func (this *Msg) Reset()         { *this = Msg{} }
-func (this *Msg) String() string { return proto1.CompactTextString(this) }
-func (*Msg) ProtoMessage()       {}
+func (m *Msg) Reset()                    { *m = Msg{} }
+func (m *Msg) String() string            { return proto1.CompactTextString(m) }
+func (*Msg) ProtoMessage()               {}
+func (*Msg) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
-func (this *Msg) GetOk() bool {
-	if this != nil && this.Ok != nil {
-		return *this.Ok
+func (m *Msg) GetOk() bool {
+	if m != nil && m.Ok != nil {
+		return *m.Ok
 	}
 	return false
 }
 
-func (this *Msg) GetError() string {
-	if this != nil && this.Error != nil {
-		return *this.Error
+func (m *Msg) GetError() string {
+	if m != nil && m.Error != nil {
+		return *m.Error
 	}
 	return ""
 }
 
-func (this *Msg) GetStates() []*State {
-	if this != nil {
-		return this.States
+func (m *Msg) GetStates() []*State {
+	if m != nil {
+		return m.States
 	}
 	return nil
 }
 
-func (this *Msg) GetQuery() *Query {
-	if this != nil {
-		return this.Query
+func (m *Msg) GetQuery() *Query {
+	if m != nil {
+		return m.Query
 	}
 	return nil
 }
 
-func (this *Msg) GetEvents() []*Event {
-	if this != nil {
-		return this.Events
+func (m *Msg) GetEvents() []*Event {
+	if m != nil {
+		return m.Events
 	}
 	return nil
 }
@@ -251,23 +274,55 @@ type Attribute struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (this *Attribute) Reset()         { *this = Attribute{} }
-func (this *Attribute) String() string { return proto1.CompactTextString(this) }
-func (*Attribute) ProtoMessage()       {}
+func (m *Attribute) Reset()                    { *m = Attribute{} }
+func (m *Attribute) String() string            { return proto1.CompactTextString(m) }
+func (*Attribute) ProtoMessage()               {}
+func (*Attribute) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
-func (this *Attribute) GetKey() string {
-	if this != nil && this.Key != nil {
-		return *this.Key
+func (m *Attribute) GetKey() string {
+	if m != nil && m.Key != nil {
+		return *m.Key
 	}
 	return ""
 }
 
-func (this *Attribute) GetValue() string {
-	if this != nil && this.Value != nil {
-		return *this.Value
+func (m *Attribute) GetValue() string {
+	if m != nil && m.Value != nil {
+		return *m.Value
 	}
 	return ""
 }
 
 func init() {
+	proto1.RegisterType((*State)(nil), "State")
+	proto1.RegisterType((*Event)(nil), "Event")
+	proto1.RegisterType((*Query)(nil), "Query")
+	proto1.RegisterType((*Msg)(nil), "Msg")
+	proto1.RegisterType((*Attribute)(nil), "Attribute")
+}
+
+func init() { proto1.RegisterFile("proto.proto", fileDescriptor0) }
+
+var fileDescriptor0 = []byte{
+	// 314 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xb4, 0x91, 0x3f, 0x4f, 0xf3, 0x30,
+	0x10, 0x87, 0xe5, 0x38, 0x49, 0x93, 0x4b, 0xff, 0xbc, 0xf2, 0xab, 0x96, 0x9b, 0x90, 0x95, 0x05,
+	0x4f, 0x1d, 0x10, 0x62, 0x67, 0x60, 0x64, 0x40, 0x7c, 0x00, 0x14, 0x52, 0x13, 0xac, 0xb6, 0x71,
+	0xb1, 0xaf, 0x95, 0x3a, 0xf2, 0x05, 0xf9, 0x4c, 0xc8, 0x6e, 0x2a, 0x58, 0x18, 0x59, 0x2c, 0xf9,
+	0xd1, 0xf9, 0xee, 0x9e, 0x9f, 0xa1, 0xda, 0x39, 0x4b, 0x76, 0x19, 0xcf, 0xfa, 0x83, 0x41, 0xf6,
+	0x44, 0x0d, 0x69, 0x31, 0x86, 0x94, 0xcc, 0x56, 0x23, 0x93, 0x4c, 0x71, 0x31, 0x81, 0xcc, 0x07,
+	0x8c, 0x89, 0x64, 0xaa, 0x14, 0x33, 0x18, 0x79, 0xed, 0x0e, 0xa6, 0xd5, 0xc8, 0x23, 0x18, 0x43,
+	0xfa, 0x66, 0x3d, 0x61, 0x1a, 0x6f, 0xff, 0xa1, 0x5a, 0x69, 0xdf, 0x3a, 0xb3, 0x23, 0x63, 0x7b,
+	0xcc, 0xce, 0x25, 0xb6, 0x6f, 0x35, 0xe6, 0x92, 0xa9, 0x22, 0xb6, 0x6f, 0x3a, 0x8f, 0x23, 0xc9,
+	0x55, 0x29, 0x2a, 0xe0, 0x44, 0x1b, 0x2c, 0x24, 0x53, 0x49, 0xfd, 0xc9, 0x20, 0xbb, 0x3f, 0xe8,
+	0x9e, 0xfe, 0x64, 0x87, 0x5f, 0xa6, 0x8a, 0x4b, 0x80, 0x86, 0xc8, 0x99, 0x97, 0x3d, 0x69, 0x8f,
+	0xa5, 0xe4, 0xaa, 0xba, 0x86, 0xe5, 0xdd, 0x19, 0x89, 0x39, 0x4c, 0xb6, 0x9a, 0x9c, 0x69, 0x9f,
+	0xbd, 0xe9, 0xe9, 0xf6, 0x06, 0x27, 0x92, 0x29, 0x21, 0xfe, 0x41, 0x31, 0xe0, 0x15, 0x4e, 0x25,
+	0x53, 0xec, 0x07, 0x79, 0xc5, 0x59, 0x14, 0xba, 0x80, 0xec, 0x71, 0xaf, 0xdd, 0x51, 0x4c, 0x21,
+	0xf7, 0xe4, 0x4c, 0xdf, 0x45, 0xa3, 0xb2, 0xee, 0x80, 0x3f, 0xf8, 0x4e, 0x00, 0x24, 0x76, 0x1d,
+	0xad, 0x8a, 0x20, 0xa9, 0x9d, 0xb3, 0x6e, 0x70, 0x5a, 0x84, 0x17, 0x4d, 0xd8, 0x28, 0x8d, 0x1b,
+	0xe5, 0xcb, 0xd3, 0xef, 0xcc, 0x21, 0x7b, 0x0f, 0x2d, 0xa3, 0x57, 0xc0, 0xa7, 0x01, 0x0b, 0xc8,
+	0x75, 0x48, 0xce, 0x63, 0x3e, 0x94, 0xc7, 0x20, 0xeb, 0x2b, 0x28, 0xbf, 0x4d, 0x2a, 0xe0, 0x6b,
+	0x7d, 0x44, 0x26, 0x13, 0x55, 0x86, 0x79, 0x87, 0x66, 0xb3, 0x1f, 0x42, 0xfd, 0x0a, 0x00, 0x00,
+	0xff, 0xff, 0x2c, 0xfb, 0x89, 0x01, 0x0d, 0x02, 0x00, 0x00,
 }

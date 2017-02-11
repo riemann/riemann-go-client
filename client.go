@@ -1,112 +1,62 @@
-// A Riemann client for Go, featuring concurrency, sending events and state updates, queries,
-// and feature parity with the reference implementation written in Ruby.
+// A Riemann client for Go, featuring concurrency, sending events and state updates, queries
 //
 // Copyright (C) 2014 by Christopher Gilbert <christopher.john.gilbert@gmail.com>
 package riemanngo
 
 import (
-	"net"
-	"time"
-
-	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
 )
 
-// GorymanClient is a client library to send events to Riemann
-type GorymanClient struct {
-	udp  *UdpTransport
-	tcp  *TcpTransport
-	addr string
+// Client is an interface to a generic client
+type Client interface {
+	Send(message *proto.Msg) (*proto.Msg, error)
+	Connect(timeout int32) error
+	Close() error
 }
 
-// NewGorymanClient - Factory
-func NewGorymanClient(addr string) *GorymanClient {
-	return &GorymanClient{
-		addr: addr,
-	}
+// IndexClient is an interface to a generic Client for index queries
+type IndexClient interface {
+	QueryIndex(q string) ([]Event, error)
 }
 
-// Connect creates a UDP and TCP connection to a Riemann server
-func (c *GorymanClient) Connect() error {
-	udp, err := net.DialTimeout("udp", c.addr, time.Second*5)
-	if err != nil {
-		return err
-	}
-	tcp, err := net.DialTimeout("tcp", c.addr, time.Second*5)
-	if err != nil {
-		return err
-	}
-	c.udp = NewUdpTransport(udp)
-	c.tcp = NewTcpTransport(tcp)
-	return nil
+// request encapsulates a request to send to the Riemann server
+type request struct {
+	message     *proto.Msg
+	response_ch chan response
 }
 
-// Close the connection to Riemann
-func (c *GorymanClient) Close() error {
-	if nil == c.udp && nil == c.tcp {
-		return nil
-	}
-	err := c.udp.Close()
-	if err != nil {
-		return err
-	}
-	return c.tcp.Close()
+// response encapsulates a response from the Riemann server
+type response struct {
+	message *proto.Msg
+	err     error
 }
 
-// Send an event
-func (c *GorymanClient) SendEvent(e *Event) error {
+// Send an event using a client
+func SendEvent(c Client, e *Event) (*proto.Msg, error) {
 	epb, err := EventToProtocolBuffer(e)
-	if err != nil {
-		return err
-	}
-
-	message := &proto.Msg{}
-	message.Events = append(message.Events, epb)
-
-	_, err = c.sendMaybeRecv(message)
-	return err
-}
-
-// Send a state update
-func (c *GorymanClient) SendState(s *State) error {
-	spb, err := StateToProtocolBuffer(s)
-	if err != nil {
-		return err
-	}
-
-	message := &proto.Msg{}
-	message.States = append(message.States, spb)
-
-	_, err = c.sendMaybeRecv(message)
-	return err
-}
-
-// Query the server for events
-func (c *GorymanClient) QueryEvents(q string) ([]Event, error) {
-	query := &proto.Query{}
-	query.String_ = pb.String(q)
-
-	message := &proto.Msg{}
-	message.Query = query
-
-	response, err := c.sendRecv(message)
 	if err != nil {
 		return nil, err
 	}
+	message := &proto.Msg{}
+	message.Events = append(message.Events, epb)
 
-	return ProtocolBuffersToEvents(response.GetEvents()), nil
+	msg, err := c.Send(message)
+	return msg, err
 }
 
-// Send and receive data from Riemann
-func (c *GorymanClient) sendRecv(m *proto.Msg) (*proto.Msg, error) {
-	return c.tcp.SendRecv(m)
-}
-
-// Send and maybe receive data from Riemann
-func (c *GorymanClient) sendMaybeRecv(m *proto.Msg) (*proto.Msg, error) {
-	_, err := c.udp.SendMaybeRecv(m)
-	if err != nil {
-		return c.tcp.SendMaybeRecv(m)
+// Send multiple events using a client
+func SendEvents(c Client, e *[]Event) (*proto.Msg, error) {
+	var events []*proto.Event
+	for _, elem := range *e {
+		epb, err := EventToProtocolBuffer(&elem)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, epb)
 	}
-	return nil, nil
+	message := &proto.Msg{}
+	message.Events = events
+
+	msg, err := c.Send(message)
+	return msg, err
 }
