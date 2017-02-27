@@ -65,7 +65,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		},
 	}
 	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion ", protoRes, " ", &protoTest)
+		t.Error("Error during event to protobuf conversion")
 	}
 	// full event
 	event = Event{
@@ -89,6 +89,90 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Description:  pb.String("desc"),
 		State:        pb.String("critical"),
 		MetricSint64: pb.Int64(100),
+		Service:      pb.String("foobar"),
+		Tags:         []string{"hello"},
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
+	// test int64
+	event = Event{
+		Host:        "baz",
+		Service:     "foobar",
+		Ttl:         20,
+		Description: "desc",
+		State:       "critical",
+		Metric:      int64(100),
+		Tags:        []string{"hello"},
+		Time:        100,
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
+		Host:         pb.String("baz"),
+		Time:         pb.Int64(100),
+		Ttl:          pb.Float32(20),
+		Description:  pb.String("desc"),
+		State:        pb.String("critical"),
+		MetricSint64: pb.Int64(100),
+		Service:      pb.String("foobar"),
+		Tags:         []string{"hello"},
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
+	// test float32
+	event = Event{
+		Host:        "baz",
+		Service:     "foobar",
+		Ttl:         20,
+		Description: "desc",
+		State:       "critical",
+		Metric:      float32(100.0),
+		Tags:        []string{"hello"},
+		Time:        100,
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
+		Host:         pb.String("baz"),
+		Time:         pb.Int64(100),
+		Ttl:          pb.Float32(20),
+		Description:  pb.String("desc"),
+		State:        pb.String("critical"),
+		MetricD:      pb.Float64(100.0),
+		Service:      pb.String("foobar"),
+		Tags:         []string{"hello"},
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
+	// test float64
+	event = Event{
+		Host:        "baz",
+		Service:     "foobar",
+		Ttl:         20,
+		Description: "desc",
+		State:       "critical",
+		Metric:      float64(100.12),
+		Tags:        []string{"hello"},
+		Time:        100,
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
+		Host:         pb.String("baz"),
+		Time:         pb.Int64(100),
+		Ttl:          pb.Float32(20),
+		Description:  pb.String("desc"),
+		State:        pb.String("critical"),
+		MetricD:      pb.Float64(100.12),
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
 	}
