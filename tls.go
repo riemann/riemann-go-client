@@ -79,10 +79,7 @@ func (t *TlsClient) Send(message *proto.Msg) (*proto.Msg, error) {
 func (t *TlsClient) Close() error {
 	close(t.requestQueue)
 	err := t.conn.Close()
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // runRequestQueue services the TlsClient request queue

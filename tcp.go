@@ -50,10 +50,7 @@ func (t *TcpClient) Send(message *proto.Msg) (*proto.Msg, error) {
 func (t *TcpClient) Close() error {
 	close(t.requestQueue)
 	err := t.conn.Close()
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // runRequestQueue services the TcpClient request queue
