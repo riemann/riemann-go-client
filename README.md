@@ -15,6 +15,10 @@ The initial [Goryman repository](https://github.com/bigdatadev/goryman) has been
 
 We've also renamed the client to `riemanngo` instead of `goryman` to make its purpose clearer.
 
+## Build Status
+
+[![Build Status](https://travis-ci.org/riemann/riemann-go-client.svg?branch=master)](https://travis-ci.org/riemann/riemann-go-client)
+
 ## Installation
 
 To install the package for use in your own programs:
