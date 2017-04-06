@@ -7,11 +7,12 @@ import (
 )
 
 func TestEventToProtocolBuffer(t *testing.T) {
-	// simple event, metric int
+	// simple event, metric int32
+	var m int32 = 100
 	event := Event{
 		Host:    "baz",
 		Service: "foobar",
-		Metric:  100,
+		Metric:  m,
 		Tags:    []string{"hello"},
 		Time:    100,
 	}
@@ -20,6 +21,28 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		t.Error("Error during EventToProtocolBuffer")
 	}
 	protoTest := proto.Event{
+		Host:         pb.String("baz"),
+		Time:         pb.Int64(100),
+		MetricSint64: pb.Int64(100),
+		Service:      pb.String("foobar"),
+		Tags:         []string{"hello"},
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
+	// simple event, metric int
+	event = Event{
+		Host:    "baz",
+		Service: "foobar",
+		Metric:  100,
+		Tags:    []string{"hello"},
+		Time:    100,
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
 		MetricSint64: pb.Int64(100),
