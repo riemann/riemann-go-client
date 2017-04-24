@@ -31,12 +31,12 @@ func TestSendEventsUdp(t *testing.T) {
 		t.Error("Error Udp client Connect")
 	}
 	events := []Event{
-		Event{
+		{
 			Service: "hello",
 			Metric:  100,
 			Tags:    []string{"hello"},
 		},
-		Event{
+		{
 			Service: "goodbye",
 			Metric:  200,
 			Tags:    []string{"goodbye"},

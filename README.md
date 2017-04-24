@@ -8,6 +8,7 @@ Features:
 * Idiomatic concurrency
 * Sending events, queries.
 * Support TCP, UDP, TLS clients.
+* Second and Microsecond time resolution
 
 This client is a fork of Goryman, a Riemann go client written by Christopher Gilbert. Thanks and full credit to him!
 

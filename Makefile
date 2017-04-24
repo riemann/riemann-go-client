@@ -1,4 +1,4 @@
-RIEMANN_VERSION = 0.2.12
+RIEMANN_VERSION = 0.2.13
 
 all:    install
 

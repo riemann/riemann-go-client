@@ -4,6 +4,7 @@ import (
 	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
 	"testing"
+	"time"
 )
 
 func TestEventToProtocolBuffer(t *testing.T) {
@@ -14,7 +15,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service: "foobar",
 		Metric:  m,
 		Tags:    []string{"hello"},
-		Time:    100,
+		Time:    time.Unix(100, 0),
 	}
 	protoRes, error := EventToProtocolBuffer(&event)
 	if error != nil {
@@ -23,6 +24,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 	protoTest := proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
+		TimeMicros:   pb.Int64(100000000),
 		MetricSint64: pb.Int64(100),
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
@@ -36,7 +38,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service: "foobar",
 		Metric:  100,
 		Tags:    []string{"hello"},
-		Time:    100,
+		Time:    time.Unix(100, 0),
 	}
 	protoRes, error = EventToProtocolBuffer(&event)
 	if error != nil {
@@ -45,6 +47,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
+		TimeMicros:   pb.Int64(100000000),
 		MetricSint64: pb.Int64(100),
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
@@ -58,7 +61,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service: "foobar",
 		Metric:  100.1,
 		Tags:    []string{"hello"},
-		Time:    100,
+		Time:    time.Unix(100, 0),
 		Ttl:     10,
 		Attributes: map[string]string{
 			"foo": "bar",
@@ -70,18 +73,19 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		t.Error("Error during EventToProtocolBuffer")
 	}
 	protoTest = proto.Event{
-		Host:    pb.String("baz"),
-		Time:    pb.Int64(100),
-		MetricD: pb.Float64(100.1),
-		Service: pb.String("foobar"),
-		Tags:    []string{"hello"},
-		Ttl:     pb.Float32(10),
+		Host:       pb.String("baz"),
+		Time:       pb.Int64(100),
+		TimeMicros: pb.Int64(100000000),
+		MetricD:    pb.Float64(100.1),
+		Service:    pb.String("foobar"),
+		Tags:       []string{"hello"},
+		Ttl:        pb.Float32(10),
 		Attributes: []*proto.Attribute{
-			&proto.Attribute{
+			{
 				Key:   pb.String("bar"),
 				Value: pb.String("baz"),
 			},
-			&proto.Attribute{
+			{
 				Key:   pb.String("foo"),
 				Value: pb.String("bar"),
 			},
@@ -99,7 +103,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		State:       "critical",
 		Metric:      100,
 		Tags:        []string{"hello"},
-		Time:        100,
+		Time:        time.Unix(100, 0),
 	}
 	protoRes, error = EventToProtocolBuffer(&event)
 	if error != nil {
@@ -108,6 +112,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
+		TimeMicros:   pb.Int64(100000000),
 		Ttl:          pb.Float32(20),
 		Description:  pb.String("desc"),
 		State:        pb.String("critical"),
@@ -127,7 +132,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		State:       "critical",
 		Metric:      int64(100),
 		Tags:        []string{"hello"},
-		Time:        100,
+		Time:        time.Unix(100, 0),
 	}
 	protoRes, error = EventToProtocolBuffer(&event)
 	if error != nil {
@@ -136,6 +141,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
+		TimeMicros:   pb.Int64(100000000),
 		Ttl:          pb.Float32(20),
 		Description:  pb.String("desc"),
 		State:        pb.String("critical"),
@@ -155,21 +161,22 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		State:       "critical",
 		Metric:      float32(100.0),
 		Tags:        []string{"hello"},
-		Time:        100,
+		Time:        time.Unix(100, 0),
 	}
 	protoRes, error = EventToProtocolBuffer(&event)
 	if error != nil {
 		t.Error("Error during EventToProtocolBuffer")
 	}
 	protoTest = proto.Event{
-		Host:         pb.String("baz"),
-		Time:         pb.Int64(100),
-		Ttl:          pb.Float32(20),
-		Description:  pb.String("desc"),
-		State:        pb.String("critical"),
-		MetricD:      pb.Float64(100.0),
-		Service:      pb.String("foobar"),
-		Tags:         []string{"hello"},
+		Host:        pb.String("baz"),
+		Time:        pb.Int64(100),
+		TimeMicros:  pb.Int64(100000000),
+		Ttl:         pb.Float32(20),
+		Description: pb.String("desc"),
+		State:       pb.String("critical"),
+		MetricD:     pb.Float64(100.0),
+		Service:     pb.String("foobar"),
+		Tags:        []string{"hello"},
 	}
 	if !pb.Equal(protoRes, &protoTest) {
 		t.Error("Error during event to protobuf conversion")
@@ -183,7 +190,33 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		State:       "critical",
 		Metric:      float64(100.12),
 		Tags:        []string{"hello"},
-		Time:        100,
+		Time:        time.Unix(100, 0),
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
+		Host:        pb.String("baz"),
+		Time:        pb.Int64(100),
+		TimeMicros:  pb.Int64(100000000),
+		Ttl:         pb.Float32(20),
+		Description: pb.String("desc"),
+		State:       pb.String("critical"),
+		MetricD:     pb.Float64(100.12),
+		Service:     pb.String("foobar"),
+		Tags:        []string{"hello"},
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
+	// simple event with time in nanosecond
+	event = Event{
+		Host:    "baz",
+		Service: "foobar",
+		Metric:  m,
+		Tags:    []string{"hello"},
+		Time:    time.Unix(100, 123456789),
 	}
 	protoRes, error = EventToProtocolBuffer(&event)
 	if error != nil {
@@ -192,10 +225,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
-		Ttl:          pb.Float32(20),
-		Description:  pb.String("desc"),
-		State:        pb.String("critical"),
-		MetricD:      pb.Float64(100.12),
+		TimeMicros:   pb.Int64(100123456),
+		MetricSint64: pb.Int64(100),
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
 	}
@@ -249,7 +280,7 @@ func compareEvents(e1 *Event, e2 *Event, t *testing.T) {
 
 func TestProtocolBuffersToEvents(t *testing.T) {
 	pbEvents := []*proto.Event{
-		&proto.Event{
+		{
 			Host:         pb.String("baz"),
 			Time:         pb.Int64(100),
 			Ttl:          pb.Float32(20),
@@ -262,7 +293,7 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 	}
 	event := Event{
 		Host:        "baz",
-		Time:        100,
+		Time:        time.Unix(100, 0),
 		Ttl:         20,
 		Description: "desc",
 		State:       "critical",
@@ -273,7 +304,7 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 	events := ProtocolBuffersToEvents(pbEvents)
 	compareEvents(&events[0], &event, t)
 	pbEvents = []*proto.Event{
-		&proto.Event{
+		{
 			Host:         pb.String("baz"),
 			Time:         pb.Int64(100),
 			Ttl:          pb.Float32(20),
@@ -283,7 +314,7 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 			Service:      pb.String("foobar"),
 			Tags:         []string{"hello"},
 		},
-		&proto.Event{
+		{
 			Host:        pb.String("baz"),
 			Time:        pb.Int64(100),
 			Ttl:         pb.Float32(20),
@@ -293,11 +324,11 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 			Service:     pb.String("foobar"),
 			Tags:        []string{"hello"},
 			Attributes: []*proto.Attribute{
-				&proto.Attribute{
+				{
 					Key:   pb.String("foo"),
 					Value: pb.String("bar"),
 				},
-				&proto.Attribute{
+				{
 					Key:   pb.String("bar"),
 					Value: pb.String("baz"),
 				},
@@ -306,7 +337,7 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 	}
 	event1 := Event{
 		Host:        "baz",
-		Time:        100,
+		Time:        time.Unix(100, 0),
 		Ttl:         20,
 		Description: "desc",
 		State:       "critical",
@@ -321,7 +352,7 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 		State:       "critical",
 		Metric:      100.1,
 		Tags:        []string{"hello"},
-		Time:        100,
+		Time:        time.Unix(100, 0),
 		Ttl:         20,
 		Attributes: map[string]string{
 			"foo": "bar",
@@ -331,4 +362,55 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 	events = ProtocolBuffersToEvents(pbEvents)
 	compareEvents(&events[0], &event1, t)
 	compareEvents(&events[1], &event2, t)
+
+	pbEvents = []*proto.Event{
+		{
+			Host:         pb.String("baz"),
+			Time:         pb.Int64(100),
+			TimeMicros:   pb.Int64(100123456),
+			Ttl:          pb.Float32(20),
+			Description:  pb.String("desc"),
+			State:        pb.String("critical"),
+			MetricSint64: pb.Int64(100),
+			Service:      pb.String("foobar"),
+			Tags:         []string{"hello"},
+		},
+	}
+	event = Event{
+		Host:        "baz",
+		Time:        time.Unix(100, 123456000),
+		Ttl:         20,
+		Description: "desc",
+		State:       "critical",
+		Metric:      int64(100),
+		Service:     "foobar",
+		Tags:        []string{"hello"},
+	}
+	events = ProtocolBuffersToEvents(pbEvents)
+	compareEvents(&events[0], &event, t)
+
+	pbEvents = []*proto.Event{
+		{
+			Host:         pb.String("baz"),
+			TimeMicros:   pb.Int64(100123456),
+			Ttl:          pb.Float32(20),
+			Description:  pb.String("desc"),
+			State:        pb.String("critical"),
+			MetricSint64: pb.Int64(100),
+			Service:      pb.String("foobar"),
+			Tags:         []string{"hello"},
+		},
+	}
+	event = Event{
+		Host:        "baz",
+		Time:        time.Unix(100, 123456000),
+		Ttl:         20,
+		Description: "desc",
+		State:       "critical",
+		Metric:      int64(100),
+		Service:     "foobar",
+		Tags:        []string{"hello"},
+	}
+	events = ProtocolBuffersToEvents(pbEvents)
+	compareEvents(&events[0], &event, t)
 }
