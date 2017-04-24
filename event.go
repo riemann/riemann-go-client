@@ -1,11 +1,13 @@
 package riemanngo
 
-import ()
+import (
+	"time"
+)
 
 // Event is a wrapper for Riemann events
 type Event struct {
 	Ttl         float32
-	Time        int64
+	Time        time.Time
 	Tags        []string
 	Host        string // Defaults to os.Hostname()
 	State       string

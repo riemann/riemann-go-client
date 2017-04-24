@@ -31,12 +31,12 @@ func TestSendEventsTcp(t *testing.T) {
 		t.Error("Error Tcp client Connect")
 	}
 	events := []Event{
-		Event{
+		{
 			Service: "hello",
 			Metric:  100,
 			Tags:    []string{"hello"},
 		},
-		Event{
+		{
 			Service: "goodbye",
 			Metric:  200,
 			Tags:    []string{"goodbye"},
@@ -56,13 +56,13 @@ func TestQueryIndex(t *testing.T) {
 		t.Error("Error Tcp client Connect")
 	}
 	events := []Event{
-		Event{
+		{
 			Host:    "foobaz",
 			Service: "golang",
 			Metric:  100,
 			Tags:    []string{"hello"},
 		},
-		Event{
+		{
 			Host:    "foobar",
 			Service: "golang",
 			Metric:  200,

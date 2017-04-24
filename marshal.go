@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"time"
 	"sort"
+	"time"
 
 	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
@@ -16,13 +16,14 @@ func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	if event.Host == "" {
 		event.Host, _ = os.Hostname()
 	}
-	if event.Time == 0 {
-		event.Time = time.Now().Unix()
+	if event.Time.IsZero() {
+		event.Time = time.Now()
 	}
 
 	var e proto.Event
 	e.Host = pb.String(event.Host)
-	e.Time = pb.Int64(event.Time)
+	e.Time = pb.Int64(event.Time.Unix())
+	e.TimeMicros = pb.Int64(event.Time.UnixNano() / int64(time.Microsecond))
 	if event.Service != "" {
 		e.Service = pb.String(event.Service)
 	}
@@ -77,8 +78,12 @@ func ProtocolBuffersToEvents(pbEvents []*proto.Event) []Event {
 			Host:        event.GetHost(),
 			Description: event.GetDescription(),
 			Ttl:         event.GetTtl(),
-			Time:        event.GetTime(),
 			Tags:        event.GetTags(),
+		}
+		if event.TimeMicros != nil {
+			e.Time = time.Unix(0, event.GetTimeMicros()*int64(time.Microsecond))
+		} else if event.Time != nil {
+			e.Time = time.Unix(event.GetTime(), 0)
 		}
 		if event.MetricF != nil {
 			e.Metric = event.GetMetricF()
