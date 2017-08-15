@@ -40,7 +40,7 @@ First, we'll need to import the library:
 
 ```go
 import (
-    "github.com/riemann/riemann-go-client/"
+    "github.com/riemann/riemann-go-client"
 )
 ```
 
