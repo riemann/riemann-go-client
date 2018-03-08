@@ -233,6 +233,26 @@ func TestEventToProtocolBuffer(t *testing.T) {
 	if !pb.Equal(protoRes, &protoTest) {
 		t.Error("Error during event to protobuf conversion")
 	}
+
+	// Event without metrics
+	event = Event{
+		Host:    "baz",
+		Service: "foobar",
+		Time:    time.Unix(100, 123456789),
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
+		Host:       pb.String("baz"),
+		Service:    pb.String("foobar"),
+		Time:       pb.Int64(100),
+		TimeMicros: pb.Int64(100123456),
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
 }
 
 func compareEvents(e1 *Event, e2 *Event, t *testing.T) {
