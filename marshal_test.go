@@ -253,6 +253,52 @@ func TestEventToProtocolBuffer(t *testing.T) {
 	if !pb.Equal(protoRes, &protoTest) {
 		t.Error("Error during event to protobuf conversion")
 	}
+
+	// Event with uint type
+	var muint uint64 = 5
+	event = Event{
+		Host:    "baz",
+		Metric:  muint,
+		Service: "foobar",
+		Time:    time.Unix(100, 123456789),
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
+		Host:         pb.String("baz"),
+		Service:      pb.String("foobar"),
+		Time:         pb.Int64(100),
+		TimeMicros:   pb.Int64(100123456),
+		MetricSint64: pb.Int64(5),
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
+
+	// Event with uint type, overflow
+	muint = 18446744073709551615
+	event = Event{
+		Host:    "baz",
+		Metric:  muint,
+		Service: "foobar",
+		Time:    time.Unix(100, 123456789),
+	}
+	protoRes, error = EventToProtocolBuffer(&event)
+	if error != nil {
+		t.Error("Error during EventToProtocolBuffer")
+	}
+	protoTest = proto.Event{
+		Host:         pb.String("baz"),
+		Service:      pb.String("foobar"),
+		Time:         pb.Int64(100),
+		TimeMicros:   pb.Int64(100123456),
+		MetricSint64: pb.Int64(-1),
+	}
+	if !pb.Equal(protoRes, &protoTest) {
+		t.Error("Error during event to protobuf conversion")
+	}
 }
 
 func compareEvents(e1 *Event, e2 *Event, t *testing.T) {

@@ -57,11 +57,13 @@ func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	if event.Metric != nil {
 		switch reflect.TypeOf(event.Metric).Kind() {
 		case reflect.Int, reflect.Int32, reflect.Int64:
-			e.MetricSint64 = pb.Int64((reflect.ValueOf(event.Metric).Int()))
+			e.MetricSint64 = pb.Int64(reflect.ValueOf(event.Metric).Int())
 		case reflect.Float32:
-			e.MetricD = pb.Float64((reflect.ValueOf(event.Metric).Float()))
+			e.MetricD = pb.Float64(reflect.ValueOf(event.Metric).Float())
 		case reflect.Float64:
-			e.MetricD = pb.Float64((reflect.ValueOf(event.Metric).Float()))
+			e.MetricD = pb.Float64(reflect.ValueOf(event.Metric).Float())
+		case reflect.Uint, reflect.Uint32, reflect.Uint64:
+			e.MetricSint64 = pb.Int64(int64(reflect.ValueOf(event.Metric).Uint()))
 		default:
 			return nil, fmt.Errorf("Metric of invalid type (type %v)",
 				reflect.TypeOf(event.Metric).Kind())

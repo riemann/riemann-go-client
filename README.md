@@ -121,6 +121,10 @@ if err != nil {
 }
 ```
 
+### Uint metric type
+
+The event `Metric` value can have `uint` (or `uint32`, `uint64`) as type. In this case, this value will be converted to `int64`, which can cause issues.
+
 ## Tests
 
 You can lauch tests using
