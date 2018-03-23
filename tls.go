@@ -17,7 +17,7 @@ import (
 // TlsClient is a type that implements the Client interface
 type TlsClient struct {
 	addr         string
-	tlsConfig    tls.Config
+	tlsConfig    *tls.Config
 	conn         net.Conn
 	requestQueue chan request
 }
@@ -48,7 +48,7 @@ func NewTlsClient(addr string, certPath string, keyPath string, insecure bool) (
 
 	t := &TlsClient{
 		addr:         addr,
-		tlsConfig:    config,
+		tlsConfig:    &config,
 		requestQueue: make(chan request),
 	}
 	go t.runRequestQueue()
@@ -61,7 +61,7 @@ func (c *TlsClient) Connect(timeout int32) error {
 	if err != nil {
 		return err
 	}
-	tlsConn := tls.Client(tcp, &c.tlsConfig)
+	tlsConn := tls.Client(tcp, c.tlsConfig)
 	c.conn = tlsConn
 	return nil
 }
