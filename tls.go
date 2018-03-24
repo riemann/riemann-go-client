@@ -62,6 +62,10 @@ func (c *TlsClient) Connect(timeout int32) error {
 		return err
 	}
 	tlsConn := tls.Client(tcp, c.tlsConfig)
+	err = tlsConn.Handshake()
+	if err != nil {
+		return err
+	}
 	c.conn = tlsConn
 	return nil
 }
