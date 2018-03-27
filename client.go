@@ -10,7 +10,7 @@ import (
 // Client is an interface to a generic client
 type Client interface {
 	Send(message *proto.Msg) (*proto.Msg, error)
-	Connect(timeout int32) error
+	Connect() error
 	Close() error
 }
 

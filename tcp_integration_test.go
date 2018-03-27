@@ -4,11 +4,12 @@ package riemanngo
 
 import (
 	"testing"
+	"time"
 )
 
 func TestSendEventTcp(t *testing.T) {
-	c := NewTcpClient("127.0.0.1:5555")
-	err := c.Connect(5)
+	c := NewTcpClient("127.0.0.1:5555", 5*time.Second)
+	err := c.Connect()
 	defer c.Close()
 	if err != nil {
 		t.Error("Error Tcp client Connect")
@@ -24,8 +25,8 @@ func TestSendEventTcp(t *testing.T) {
 }
 
 func TestSendEventsTcp(t *testing.T) {
-	c := NewTcpClient("127.0.0.1:5555")
-	err := c.Connect(5)
+	c := NewTcpClient("127.0.0.1:5555", 5*time.Second)
+	err := c.Connect()
 	defer c.Close()
 	if err != nil {
 		t.Error("Error Tcp client Connect")
@@ -49,8 +50,8 @@ func TestSendEventsTcp(t *testing.T) {
 }
 
 func TestQueryIndex(t *testing.T) {
-	c := NewTcpClient("127.0.0.1:5555")
-	err := c.Connect(5)
+	c := NewTcpClient("127.0.0.1:5555", 5*time.Second)
+	err := c.Connect()
 	defer c.Close()
 	if err != nil {
 		t.Error("Error Tcp client Connect")
@@ -80,9 +81,9 @@ func TestQueryIndex(t *testing.T) {
 }
 
 func TestTcpConnec(t *testing.T) {
-	c := NewTcpClient("does.not.exists:8888")
+	c := NewTcpClient("does.not.exists:8888", 5*time.Second)
 	// should produce an error
-	err := c.Connect(2)
+	err := c.Connect()
 	if err == nil {
 		t.Error("Error, should fail")
 	}

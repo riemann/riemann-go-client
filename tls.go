@@ -20,10 +20,11 @@ type TlsClient struct {
 	tlsConfig    *tls.Config
 	conn         net.Conn
 	requestQueue chan request
+	timeout      time.Duration
 }
 
 // NewTlsClient - Factory
-func NewTlsClient(addr string, certPath string, keyPath string, insecure bool) (*TlsClient, error) {
+func NewTlsClient(addr string, certPath string, keyPath string, insecure bool, timeout time.Duration) (*TlsClient, error) {
 	certFile, err := ioutil.ReadFile(certPath)
 	if err != nil {
 		return nil, err
@@ -50,14 +51,15 @@ func NewTlsClient(addr string, certPath string, keyPath string, insecure bool) (
 		addr:         addr,
 		tlsConfig:    &config,
 		requestQueue: make(chan request),
+		timeout:      timeout,
 	}
 	go t.runRequestQueue()
 	return t, nil
 }
 
 // connect the TlsClient
-func (c *TlsClient) Connect(timeout int32) error {
-	tcp, err := net.DialTimeout("tcp", c.addr, time.Second*time.Duration(timeout))
+func (c *TlsClient) Connect() error {
+	tcp, err := net.DialTimeout("tcp", c.addr, time.Second*time.Duration(c.timeout))
 	if err != nil {
 		return err
 	}
@@ -99,6 +101,10 @@ func (t *TlsClient) runRequestQueue() {
 
 // execRequest will send a TCP message (using tls) to Riemann
 func (t *TlsClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
+	err := t.conn.SetDeadline(time.Now().Add(t.timeout))
+	if err != nil {
+		return nil, err
+	}
 	msg := &proto.Msg{}
 	data, err := pb.Marshal(message)
 	if err != nil {
@@ -132,6 +138,10 @@ func (t *TlsClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
 
 // Query the server for events using the client
 func (c *TlsClient) QueryIndex(q string) ([]Event, error) {
+	err := c.conn.SetDeadline(time.Now().Add(c.timeout))
+	if err != nil {
+		return nil, err
+	}
 	query := &proto.Query{}
 	query.String_ = pb.String(q)
 

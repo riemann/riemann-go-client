@@ -16,21 +16,23 @@ type TcpClient struct {
 	addr         string
 	conn         net.Conn
 	requestQueue chan request
+	timeout      time.Duration
 }
 
 // NewTcpClient - Factory
-func NewTcpClient(addr string) *TcpClient {
+func NewTcpClient(addr string, timeout time.Duration) *TcpClient {
 	t := &TcpClient{
 		addr:         addr,
 		requestQueue: make(chan request),
+		timeout:      timeout,
 	}
 	go t.runRequestQueue()
 	return t
 }
 
 // connect the TcpClient
-func (c *TcpClient) Connect(timeout int32) error {
-	tcp, err := net.DialTimeout("tcp", c.addr, time.Second*time.Duration(timeout))
+func (c *TcpClient) Connect() error {
+	tcp, err := net.DialTimeout("tcp", c.addr, time.Second*time.Duration(c.timeout))
 	if err != nil {
 		return err
 	}
@@ -67,6 +69,10 @@ func (t *TcpClient) runRequestQueue() {
 
 // execRequest will send a TCP message to Riemann
 func (t *TcpClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
+	err := t.conn.SetDeadline(time.Now().Add(t.timeout))
+	if err != nil {
+		return nil, err
+	}
 	msg := &proto.Msg{}
 	data, err := pb.Marshal(message)
 	if err != nil {
@@ -112,6 +118,10 @@ func readMessages(r io.Reader, p []byte) error {
 
 // Query the server for events using the client
 func (c *TcpClient) QueryIndex(q string) ([]Event, error) {
+	err := c.conn.SetDeadline(time.Now().Add(c.timeout))
+	if err != nil {
+		return nil, err
+	}
 	query := &proto.Query{}
 	query.String_ = pb.String(q)
 
