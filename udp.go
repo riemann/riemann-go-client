@@ -14,23 +14,25 @@ type UdpClient struct {
 	addr         string
 	conn         net.Conn
 	requestQueue chan request
+	timeout      time.Duration
 }
 
 // MAX_UDP_SIZE is the maximum allowed size of a UDP packet before automatically failing the send
 const MAX_UDP_SIZE = 16384
 
 // NewUdpClient - Factory
-func NewUdpClient(addr string) *UdpClient {
+func NewUdpClient(addr string, timeout time.Duration) *UdpClient {
 	t := &UdpClient{
 		addr:         addr,
 		requestQueue: make(chan request),
+		timeout:      timeout,
 	}
 	go t.runRequestQueue()
 	return t
 }
 
-func (c *UdpClient) Connect(timeout int32) error {
-	udp, err := net.DialTimeout("udp", c.addr, time.Second*time.Duration(timeout))
+func (c *UdpClient) Connect() error {
+	udp, err := net.DialTimeout("udp", c.addr, time.Second*time.Duration(c.timeout))
 	if err != nil {
 		return err
 	}
@@ -66,6 +68,10 @@ func (t *UdpClient) runRequestQueue() {
 
 // execRequest will send a UDP message to Riemann
 func (t *UdpClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
+	err := t.conn.SetDeadline(time.Now().Add(t.timeout))
+	if err != nil {
+		return nil, err
+	}
 	data, err := pb.Marshal(message)
 	if err != nil {
 		return nil, err

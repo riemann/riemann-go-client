@@ -4,11 +4,12 @@ package riemanngo
 
 import (
 	"testing"
+	"time"
 )
 
 func TestSendEventUdp(t *testing.T) {
-	c := NewUdpClient("127.0.0.1:5555")
-	err := c.Connect(5)
+	c := NewUdpClient("127.0.0.1:5555", 5*time.Second)
+	err := c.Connect()
 	defer c.Close()
 	if err != nil {
 		t.Error("Error Udp client Connect")
@@ -24,8 +25,8 @@ func TestSendEventUdp(t *testing.T) {
 }
 
 func TestSendEventsUdp(t *testing.T) {
-	c := NewUdpClient("127.0.0.1:5555")
-	err := c.Connect(5)
+	c := NewUdpClient("127.0.0.1:5555", 5*time.Second)
+	err := c.Connect()
 	defer c.Close()
 	if err != nil {
 		t.Error("Error Udp client Connect")
@@ -49,9 +50,9 @@ func TestSendEventsUdp(t *testing.T) {
 }
 
 func TestUdpConnec(t *testing.T) {
-	c := NewUdpClient("does.not.exists:8888")
+	c := NewUdpClient("does.not.exists:8888", 5*time.Second)
 	// should produce an error
-	err := c.Connect(2)
+	err := c.Connect()
 	if err == nil {
 		t.Error("Error, should fail")
 	}

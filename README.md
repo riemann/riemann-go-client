@@ -44,12 +44,12 @@ import (
 )
 ```
 
-Next, we'll need to establish a new client. The parameter is the connection timeout duration. You can use a TCP client:
+Next, we'll need to establish a new client. The parameters are the Riemann address and the connection timeout duration. You can use a TCP client:
 
 
 ```go
-c := riemanngo.NewTcpClient("127.0.0.1:5555")
-err := c.Connect(5)
+c := riemanngo.NewTcpClient("127.0.0.1:5555", 5*time.Second)
+err := c.Connect()
 if err != nil {
     panic(err)
 }
@@ -58,20 +58,20 @@ if err != nil {
 Or a UDP client:
 
 ```go
-c := riemanngo.NewUdpClient("127.0.0.1:5555")
-err := c.Connect(5)
+c := riemanngo.NewUdpClient("127.0.0.1:5555", 5*time.Second)
+err := c.Connect()
 if err != nil {
     panic(err)
 }
 ```
 
 You can also create a TLS client.
-The second parameter is the path to your client certificate, the third parameter the path to your client key. The last parameter allows you to create an insecure connection (insecure certificate check).
+The second parameter is the path to your client certificate, the third parameter the path to your client key. The next parameter allows you to create an insecure connection (insecure certificate check). The last parameter is the connect and write timeout.
 You can find more informations about how to configure TLS in Riemann [here](http://riemann.io/howto.html#securing-traffic-using-tls).
 
 ```go
-c := riemanngo.NewTlsClient("127.0.0.1:5554", "/path/to/cert.pem", "/path/to/key.key", true)
-err := c.Connect(5)
+c := riemanngo.NewTlsClient("127.0.0.1:5554", "/path/to/cert.pem", "/path/to/key.key", true, 5*time.Second)
+err := c.Connect()
 if err != nil {
     panic(err)
 }
