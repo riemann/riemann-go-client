@@ -3,6 +3,7 @@ package riemanngo
 import (
 	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
@@ -17,10 +18,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Tags:    []string{"hello"},
 		Time:    time.Unix(100, 0),
 	}
-	protoRes, error := EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err := EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest := proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
@@ -29,9 +28,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 	// simple event, metric int
 	event = Event{
 		Host:    "baz",
@@ -40,10 +37,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Tags:    []string{"hello"},
 		Time:    time.Unix(100, 0),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
@@ -52,9 +47,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 	// event with attributes, metric float
 	event = Event{
 		Host:    "baz",
@@ -68,10 +61,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 			"bar": "baz",
 		},
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:       pb.String("baz"),
 		Time:       pb.Int64(100),
@@ -91,9 +82,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 			},
 		},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 	// full event
 	event = Event{
 		Host:        "baz",
@@ -105,10 +94,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Tags:        []string{"hello"},
 		Time:        time.Unix(100, 0),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
@@ -120,9 +107,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 	// test int64
 	event = Event{
 		Host:        "baz",
@@ -134,10 +119,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Tags:        []string{"hello"},
 		Time:        time.Unix(100, 0),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
@@ -149,9 +132,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 	// test float32
 	event = Event{
 		Host:        "baz",
@@ -163,10 +144,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Tags:        []string{"hello"},
 		Time:        time.Unix(100, 0),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:        pb.String("baz"),
 		Time:        pb.Int64(100),
@@ -178,9 +157,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service:     pb.String("foobar"),
 		Tags:        []string{"hello"},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 	// test float64
 	event = Event{
 		Host:        "baz",
@@ -192,10 +169,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Tags:        []string{"hello"},
 		Time:        time.Unix(100, 0),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:        pb.String("baz"),
 		Time:        pb.Int64(100),
@@ -207,9 +182,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service:     pb.String("foobar"),
 		Tags:        []string{"hello"},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 	// simple event with time in nanosecond
 	event = Event{
 		Host:    "baz",
@@ -218,10 +191,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Tags:    []string{"hello"},
 		Time:    time.Unix(100, 123456789),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Time:         pb.Int64(100),
@@ -230,9 +201,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service:      pb.String("foobar"),
 		Tags:         []string{"hello"},
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 
 	// Event without metrics
 	event = Event{
@@ -240,19 +209,15 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service: "foobar",
 		Time:    time.Unix(100, 123456789),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:       pb.String("baz"),
 		Service:    pb.String("foobar"),
 		Time:       pb.Int64(100),
 		TimeMicros: pb.Int64(100123456),
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 
 	// Event with uint type
 	var muint uint64 = 5
@@ -262,10 +227,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service: "foobar",
 		Time:    time.Unix(100, 123456789),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Service:      pb.String("foobar"),
@@ -273,9 +236,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		TimeMicros:   pb.Int64(100123456),
 		MetricSint64: pb.Int64(5),
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 
 	// Event with uint type, overflow
 	muint = 18446744073709551615
@@ -285,10 +246,8 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		Service: "foobar",
 		Time:    time.Unix(100, 123456789),
 	}
-	protoRes, error = EventToProtocolBuffer(&event)
-	if error != nil {
-		t.Error("Error during EventToProtocolBuffer")
-	}
+	protoRes, err = EventToProtocolBuffer(&event)
+	assert.NoError(t, err)
 	protoTest = proto.Event{
 		Host:         pb.String("baz"),
 		Service:      pb.String("foobar"),
@@ -296,9 +255,7 @@ func TestEventToProtocolBuffer(t *testing.T) {
 		TimeMicros:   pb.Int64(100123456),
 		MetricSint64: pb.Int64(-1),
 	}
-	if !pb.Equal(protoRes, &protoTest) {
-		t.Error("Error during event to protobuf conversion")
-	}
+	assert.Equal(t, protoRes, &protoTest)
 }
 
 func compareEvents(e1 *Event, e2 *Event, t *testing.T) {

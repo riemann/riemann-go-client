@@ -11,7 +11,7 @@ import (
 	"github.com/riemann/riemann-go-client/proto"
 )
 
-// convert an event to a protobuf Event
+// EventToProtocolBuffer convert an event to a protobuf Event
 func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	if event.Host == "" {
 		event.Host, _ = os.Hostname()
@@ -72,7 +72,7 @@ func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	return &e, nil
 }
 
-// converts an array of proto.Event to an array of Event
+// ProtocolBuffersToEvents converts an array of proto.Event to an array of Event
 func ProtocolBuffersToEvents(pbEvents []*proto.Event) []Event {
 	var events []Event
 	for _, event := range pbEvents {

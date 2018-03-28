@@ -2,8 +2,11 @@ package riemanngo
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/binary"
 	"io"
+	"io/ioutil"
 	"net"
 	"time"
 
@@ -11,17 +14,58 @@ import (
 	"github.com/riemann/riemann-go-client/proto"
 )
 
-// TcpClient is a type that implements the Client interface
-type TcpClient struct {
+// TCPClient is a type that implements the Client interface
+type TCPClient struct {
+	tls          bool
 	addr         string
 	conn         net.Conn
 	requestQueue chan request
 	timeout      time.Duration
+	tlsConfig    *tls.Config
 }
 
-// NewTcpClient - Factory
-func NewTcpClient(addr string, timeout time.Duration) *TcpClient {
-	t := &TcpClient{
+// NewTLSClient - Factory
+func NewTLSClient(addr string, tlsConfig *tls.Config, timeout time.Duration) (*TCPClient, error) {
+	t := &TCPClient{
+		tls:          true,
+		addr:         addr,
+		tlsConfig:    tlsConfig,
+		requestQueue: make(chan request),
+		timeout:      timeout,
+	}
+	go t.runRequestQueue()
+	return t, nil
+}
+
+// GetTLSConfig returns a *tls.Config
+func GetTLSConfig(serverName string, certPath string, keyPath string, insecure bool) (*tls.Config, error) {
+	certFile, err := ioutil.ReadFile(certPath)
+	if err != nil {
+		return nil, err
+	}
+
+	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	clientCertPool := x509.NewCertPool()
+	clientCertPool.AppendCertsFromPEM(certFile)
+	config := tls.Config{
+		Certificates:       []tls.Certificate{cert},
+		RootCAs:            clientCertPool,
+		InsecureSkipVerify: insecure}
+	if !insecure {
+		config.ServerName = serverName
+	}
+	return &config, nil
+
+}
+
+// NewTCPClient - Factory
+func NewTCPClient(addr string, timeout time.Duration) *TCPClient {
+	t := &TCPClient{
+		tls:          false,
 		addr:         addr,
 		requestQueue: make(chan request),
 		timeout:      timeout,
@@ -30,46 +74,55 @@ func NewTcpClient(addr string, timeout time.Duration) *TcpClient {
 	return t
 }
 
-// connect the TcpClient
-func (c *TcpClient) Connect() error {
-	tcp, err := net.DialTimeout("tcp", c.addr, time.Second*time.Duration(c.timeout))
+// Connect connect the client
+func (c *TCPClient) Connect() error {
+	connection, err := net.DialTimeout("tcp", c.addr, time.Second*time.Duration(c.timeout))
 	if err != nil {
 		return err
 	}
-	c.conn = tcp
+	if c.tls {
+		tlsConn := tls.Client(connection, c.tlsConfig)
+		err = tlsConn.Handshake()
+		if err != nil {
+			return err
+		}
+		c.conn = tlsConn
+	} else {
+		c.conn = connection
+	}
 	return nil
 }
 
-// TcpClient implementation of Send, queues a request to send a message to the server
-func (t *TcpClient) Send(message *proto.Msg) (*proto.Msg, error) {
-	response_ch := make(chan response)
-	t.requestQueue <- request{message, response_ch}
-	r := <-response_ch
+// Send queues a request to send a message to the server
+func (c *TCPClient) Send(message *proto.Msg) (*proto.Msg, error) {
+	responseCh := make(chan response)
+	c.requestQueue <- request{message, responseCh}
+	r := <-responseCh
 	return r.message, r.err
 }
 
-// Close will close the TcpClient
-func (t *TcpClient) Close() error {
-	close(t.requestQueue)
-	err := t.conn.Close()
+// Close will close the TCPClient
+func (c *TCPClient) Close() error {
+	close(c.requestQueue)
+	err := c.conn.Close()
 	return err
 }
 
-// runRequestQueue services the TcpClient request queue
-func (t *TcpClient) runRequestQueue() {
-	for req := range t.requestQueue {
+// runRequestQueue services the TCPClient request queue
+func (c *TCPClient) runRequestQueue() {
+	for req := range c.requestQueue {
 		message := req.message
-		response_ch := req.response_ch
+		responseCh := req.responseCh
 
-		msg, err := t.execRequest(message)
+		msg, err := c.execRequest(message)
 
-		response_ch <- response{msg, err}
+		responseCh <- response{msg, err}
 	}
 }
 
 // execRequest will send a TCP message to Riemann
-func (t *TcpClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
-	err := t.conn.SetDeadline(time.Now().Add(t.timeout))
+func (c *TCPClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
+	err := c.conn.SetDeadline(time.Now().Add(c.timeout))
 	if err != nil {
 		return nil, err
 	}
@@ -83,19 +136,19 @@ func (t *TcpClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
 		return msg, err
 	}
 	// send the msg length
-	if _, err = t.conn.Write(b.Bytes()); err != nil {
+	if _, err = c.conn.Write(b.Bytes()); err != nil {
 		return msg, err
 	}
 	// send the msg
-	if _, err = t.conn.Write(data); err != nil {
+	if _, err = c.conn.Write(data); err != nil {
 		return msg, err
 	}
 	var header uint32
-	if err = binary.Read(t.conn, binary.BigEndian, &header); err != nil {
+	if err = binary.Read(c.conn, binary.BigEndian, &header); err != nil {
 		return msg, err
 	}
 	response := make([]byte, header)
-	if err = readMessages(t.conn, response); err != nil {
+	if err = readMessages(c.conn, response); err != nil {
 		return msg, err
 	}
 	if err = pb.Unmarshal(response, msg); err != nil {
@@ -116,8 +169,8 @@ func readMessages(r io.Reader, p []byte) error {
 	return nil
 }
 
-// Query the server for events using the client
-func (c *TcpClient) QueryIndex(q string) ([]Event, error) {
+// QueryIndex query the server for events using the client
+func (c *TCPClient) QueryIndex(q string) ([]Event, error) {
 	err := c.conn.SetDeadline(time.Now().Add(c.timeout))
 	if err != nil {
 		return nil, err

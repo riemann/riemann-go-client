@@ -3,34 +3,29 @@
 package riemanngo
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
 func TestSendEventTcp(t *testing.T) {
-	c := NewTcpClient("127.0.0.1:5555", 5*time.Second)
+	c := NewTCPClient("127.0.0.1:5555", 5*time.Second)
 	err := c.Connect()
 	defer c.Close()
-	if err != nil {
-		t.Error("Error Tcp client Connect")
-	}
+	assert.NoError(t, err)
 	result, err := SendEvent(c, &Event{
 		Service: "LOOOl",
 		Metric:  100,
 		Tags:    []string{"nonblocking"},
 	})
-	if !*result.Ok {
-		t.Error("Error Tcp client SendEvent")
-	}
+	assert.True(t, *result.Ok)
 }
 
 func TestSendEventsTcp(t *testing.T) {
-	c := NewTcpClient("127.0.0.1:5555", 5*time.Second)
+	c := NewTCPClient("127.0.0.1:5555", 5*time.Second)
 	err := c.Connect()
 	defer c.Close()
-	if err != nil {
-		t.Error("Error Tcp client Connect")
-	}
+	assert.NoError(t, err)
 	events := []Event{
 		{
 			Service: "hello",
@@ -44,18 +39,14 @@ func TestSendEventsTcp(t *testing.T) {
 		},
 	}
 	result, err := SendEvents(c, &events)
-	if !*result.Ok {
-		t.Error("Error Tcp client SendEvent")
-	}
+	assert.True(t, *result.Ok)
 }
 
 func TestQueryIndex(t *testing.T) {
-	c := NewTcpClient("127.0.0.1:5555", 5*time.Second)
+	c := NewTCPClient("127.0.0.1:5555", 5*time.Second)
 	err := c.Connect()
 	defer c.Close()
-	if err != nil {
-		t.Error("Error Tcp client Connect")
-	}
+	assert.NoError(t, err)
 	events := []Event{
 		{
 			Host:    "foobaz",
@@ -71,20 +62,16 @@ func TestQueryIndex(t *testing.T) {
 		},
 	}
 	result, err := SendEvents(c, &events)
-	if !*result.Ok {
-		t.Error("Error Tcp client SendEvent")
-	}
+	assert.NoError(t, err)
+	assert.True(t, *result.Ok)
 	queryResult, err := c.QueryIndex("(service = \"golang\")")
-	if len(queryResult) != 2 {
-		t.Error("Error Tcp client QueryIndex")
-	}
+	assert.True(t, *result.Ok)
+	assert.Equal(t, 2, len(queryResult))
 }
 
-func TestTcpConnec(t *testing.T) {
-	c := NewTcpClient("does.not.exists:8888", 5*time.Second)
+func TestTcpConnect(t *testing.T) {
+	c := NewTCPClient("does.not.exists:8888", 5*time.Second)
 	// should produce an error
 	err := c.Connect()
-	if err == nil {
-		t.Error("Error, should fail")
-	}
+	assert.Error(t, err)
 }

@@ -21,8 +21,8 @@ type IndexClient interface {
 
 // request encapsulates a request to send to the Riemann server
 type request struct {
-	message     *proto.Msg
-	response_ch chan response
+	message    *proto.Msg
+	responseCh chan response
 }
 
 // response encapsulates a response from the Riemann server
@@ -31,7 +31,7 @@ type response struct {
 	err     error
 }
 
-// Send an event using a client
+// SendEvent send an event using a client
 func SendEvent(c Client, e *Event) (*proto.Msg, error) {
 	epb, err := EventToProtocolBuffer(e)
 	if err != nil {
@@ -44,7 +44,7 @@ func SendEvent(c Client, e *Event) (*proto.Msg, error) {
 	return msg, err
 }
 
-// Send multiple events using a client
+// SendEvents send multiple events using a client
 func SendEvents(c Client, e *[]Event) (*proto.Msg, error) {
 	var events []*proto.Event
 	for _, elem := range *e {
