@@ -21,7 +21,7 @@ sleep 10
 echo "Launch tests"
 echo
 echo
-go test -tags=integration
+go test -v -race ./... -tags=integration
 echo
 echo
 echo "Stop Riemann"

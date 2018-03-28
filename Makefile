@@ -7,7 +7,7 @@ install:
 	go install ./proto
 
 test:
-	go test
+	go test -race ./...
 
 benchmarks:
 	go test -bench=. -benchmem

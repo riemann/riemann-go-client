@@ -48,7 +48,7 @@ Next, we'll need to establish a new client. The parameters are the Riemann addre
 
 
 ```go
-c := riemanngo.NewTcpClient("127.0.0.1:5555", 5*time.Second)
+c := riemanngo.NewTCPClient("127.0.0.1:5555", 5*time.Second)
 err := c.Connect()
 if err != nil {
     panic(err)
@@ -58,7 +58,7 @@ if err != nil {
 Or a UDP client:
 
 ```go
-c := riemanngo.NewUdpClient("127.0.0.1:5555", 5*time.Second)
+c := riemanngo.NewUDPClient("127.0.0.1:5555", 5*time.Second)
 err := c.Connect()
 if err != nil {
     panic(err)
@@ -70,7 +70,7 @@ The second parameter is the path to your client certificate, the third parameter
 You can find more informations about how to configure TLS in Riemann [here](http://riemann.io/howto.html#securing-traffic-using-tls).
 
 ```go
-c := riemanngo.NewTlsClient("127.0.0.1:5554", "/path/to/cert.pem", "/path/to/key.key", true, 5*time.Second)
+c := riemanngo.NewTLSClient("127.0.0.1:5554", "/path/to/cert.pem", "/path/to/key.key", true, 5*time.Second)
 err := c.Connect()
 if err != nil {
     panic(err)

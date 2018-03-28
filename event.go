@@ -6,10 +6,10 @@ import (
 
 // Event is a wrapper for Riemann events
 type Event struct {
-	Ttl         float32
+	TTL         time.Duration
 	Time        time.Time
 	Tags        []string
-	Host        string // Defaults to os.Hostname()
+	Host        string
 	State       string
 	Service     string
 	Metric      interface{} // Could be Int, Float32, Float64
