@@ -32,7 +32,7 @@ func NewTcpClient(addr string, timeout time.Duration) *TcpClient {
 
 // connect the TcpClient
 func (c *TcpClient) Connect() error {
-	tcp, err := net.DialTimeout("tcp", c.addr, time.Second*time.Duration(c.timeout))
+	tcp, err := net.DialTimeout("tcp", c.addr, c.timeout)
 	if err != nil {
 		return err
 	}
