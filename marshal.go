@@ -16,14 +16,17 @@ func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	if event.Host == "" {
 		event.Host, _ = os.Hostname()
 	}
+
 	if event.Time.IsZero() {
 		event.Time = time.Now()
 	}
 
 	var e proto.Event
+
 	e.Host = pb.String(event.Host)
 	e.Time = pb.Int64(event.Time.Unix())
 	e.TimeMicros = pb.Int64(event.Time.UnixNano() / int64(time.Microsecond))
+
 	if event.Service != "" {
 		e.Service = pb.String(event.Service)
 	}
@@ -31,25 +34,17 @@ func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 	if event.State != "" {
 		e.State = pb.String(event.State)
 	}
+
 	if event.Description != "" {
 		e.Description = pb.String(event.Description)
 	}
-	e.Tags = event.Tags
-	var attrs []*proto.Attribute
 
-	// sort keys
-	var keys []string
-	for key := range event.Attributes {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	for _, key := range keys {
-		attrs = append(attrs, &proto.Attribute{
-			Key:   pb.String(key),
-			Value: pb.String(event.Attributes[key]),
-		})
-	}
-	e.Attributes = attrs
+	e.Tags = event.Tags
+
+	e.Attributes = sortAttributes(
+		event.Attributes,
+	)
+
 	if event.Ttl != 0 {
 		e.Ttl = pb.Float32(event.Ttl)
 	}
@@ -69,6 +64,7 @@ func EventToProtocolBuffer(event *Event) (*proto.Event, error) {
 				reflect.TypeOf(event.Metric).Kind())
 		}
 	}
+
 	return &e, nil
 }
 
@@ -105,4 +101,34 @@ func ProtocolBuffersToEvents(pbEvents []*proto.Event) []Event {
 		events = append(events, e)
 	}
 	return events
+}
+
+func sortAttributes(attributes map[string]string) []*proto.Attribute {
+	keys := make(
+		[]string, len(attributes),
+	)
+
+	i := 0
+
+	for attr := range attributes {
+		keys[i] = attr
+		i++
+	}
+
+	sort.Strings(keys)
+
+	// ---
+
+	attrs := make(
+		[]*proto.Attribute, len(keys),
+	)
+
+	for i, key := range keys {
+		attrs[i] = &proto.Attribute{
+			Key:   pb.String(key),
+			Value: pb.String(attributes[key]),
+		}
+	}
+
+	return attrs
 }

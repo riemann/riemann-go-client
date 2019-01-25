@@ -9,6 +9,9 @@ install:
 test:
 	go test
 
+benchmarks:
+	go test -bench=. -benchmem
+
 integ-test:
 	make integ ; make clean
 

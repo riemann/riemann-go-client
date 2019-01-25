@@ -1,10 +1,11 @@
 package riemanngo
 
 import (
-	pb "github.com/golang/protobuf/proto"
-	"github.com/riemann/riemann-go-client/proto"
 	"testing"
 	"time"
+
+	pb "github.com/golang/protobuf/proto"
+	"github.com/riemann/riemann-go-client/proto"
 )
 
 func TestEventToProtocolBuffer(t *testing.T) {
@@ -479,4 +480,28 @@ func TestProtocolBuffersToEvents(t *testing.T) {
 	}
 	events = ProtocolBuffersToEvents(pbEvents)
 	compareEvents(&events[0], &event, t)
+}
+
+func BenchmarkEventToProtocolBuffer(b *testing.B) {
+	e := &Event{
+		Host:    "baz",
+		Service: "foobar",
+		Metric:  123,
+		Tags:    []string{"hello"},
+		Time:    time.Unix(100, 0),
+		Attributes: map[string]string{
+			"d": "4",
+			"c": "3",
+			"b": "2",
+			"a": "1",
+		},
+	}
+
+	for n := 0; n < b.N; n++ {
+		_, err := EventToProtocolBuffer(e)
+
+		if err != nil {
+			b.Fatal("Marshaling error")
+		}
+	}
 }
