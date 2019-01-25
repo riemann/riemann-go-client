@@ -33,30 +33,31 @@ type response struct {
 
 // Send an event using a client
 func SendEvent(c Client, e *Event) (*proto.Msg, error) {
-	epb, err := EventToProtocolBuffer(e)
-	if err != nil {
-		return nil, err
-	}
-	message := &proto.Msg{}
-	message.Events = append(message.Events, epb)
-
-	msg, err := c.Send(message)
-	return msg, err
+	return SendEvents(
+		c, &([]Event{*e}),
+	)
 }
 
 // Send multiple events using a client
 func SendEvents(c Client, e *[]Event) (*proto.Msg, error) {
-	var events []*proto.Event
-	for _, elem := range *e {
-		epb, err := EventToProtocolBuffer(&elem)
+	buff := make(
+		[]*proto.Event, len(*e),
+	)
+
+	for i, elem := range *e {
+		epb, err := EventToProtocolBuffer(
+			&elem,
+		)
+
 		if err != nil {
 			return nil, err
 		}
-		events = append(events, epb)
-	}
-	message := &proto.Msg{}
-	message.Events = events
 
-	msg, err := c.Send(message)
-	return msg, err
+		buff[i] = epb
+	}
+
+	message := new(proto.Msg)
+	message.Events = buff
+
+	return c.Send(message)
 }
