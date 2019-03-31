@@ -8,7 +8,7 @@ import (
 )
 
 func TestSendEventUdp(t *testing.T) {
-	c := NewUdpClient("127.0.0.1:5555", 5*time.Second)
+	c := NewUDPClient("127.0.0.1:5555", 5*time.Second)
 	err := c.Connect()
 	defer c.Close()
 	if err != nil {
@@ -24,8 +24,8 @@ func TestSendEventUdp(t *testing.T) {
 	}
 }
 
-func TestSendEventsUdp(t *testing.T) {
-	c := NewUdpClient("127.0.0.1:5555", 5*time.Second)
+func TestSendEventsUDP(t *testing.T) {
+	c := NewUDPClient("127.0.0.1:5555", 5*time.Second)
 	err := c.Connect()
 	defer c.Close()
 	if err != nil {
@@ -49,8 +49,8 @@ func TestSendEventsUdp(t *testing.T) {
 	}
 }
 
-func TestUdpConnec(t *testing.T) {
-	c := NewUdpClient("does.not.exists:8888", 5*time.Second)
+func TestUDPConnec(t *testing.T) {
+	c := NewUDPClient("does.not.exists:8888", 5*time.Second)
 	// should produce an error
 	err := c.Connect()
 	if err == nil {

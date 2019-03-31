@@ -7,31 +7,36 @@ import (
 
 	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
+	"gopkg.in/tomb.v2"
 )
 
-// UdpClient is a type that implements the Client interface
-type UdpClient struct {
+// UDPClient is a type that implements the Client interface
+type UDPClient struct {
 	addr         string
 	conn         net.Conn
 	requestQueue chan request
 	timeout      time.Duration
+	t            tomb.Tomb
 }
 
-// MAX_UDP_SIZE is the maximum allowed size of a UDP packet before automatically failing the send
-const MAX_UDP_SIZE = 16384
+// MaxUDPSize is the maximum allowed size of a UDP packet before automatically failing the send
+const MaxUDPSize = 16384
 
-// NewUdpClient - Factory
-func NewUdpClient(addr string, timeout time.Duration) *UdpClient {
-	t := &UdpClient{
+// NewUDPClient - Factory
+func NewUDPClient(addr string, timeout time.Duration) *UDPClient {
+	t := &UDPClient{
 		addr:         addr,
 		requestQueue: make(chan request),
 		timeout:      timeout,
 	}
-	go t.runRequestQueue()
 	return t
 }
 
-func (c *UdpClient) Connect() error {
+// Connect the udp client
+func (c *UDPClient) Connect() error {
+	c.t.Go(func() error {
+		return c.runRequestQueue()
+	})
 	udp, err := net.DialTimeout("udp", c.addr, c.timeout)
 	if err != nil {
 		return err
@@ -40,35 +45,45 @@ func (c *UdpClient) Connect() error {
 	return nil
 }
 
-func (t *UdpClient) Send(message *proto.Msg) (*proto.Msg, error) {
-	response_ch := make(chan response)
-	t.requestQueue <- request{message, response_ch}
-	r := <-response_ch
+// Send queues a request to send a message to the server
+func (c *UDPClient) Send(message *proto.Msg) (*proto.Msg, error) {
+	responseCh := make(chan response)
+	c.requestQueue <- request{message, responseCh}
+	r := <-responseCh
 	return r.message, r.err
 }
 
-// Close will close the UdpClient
-func (t *UdpClient) Close() error {
-	close(t.requestQueue)
-	err := t.conn.Close()
+// Close will close the UDPClient
+func (c *UDPClient) Close() error {
+	c.t.Kill(nil)
+	_ = c.t.Wait()
+	close(c.requestQueue)
+	err := c.conn.Close()
 	return err
 }
 
-// runRequestQueue services the UdpClient request queue
-func (t *UdpClient) runRequestQueue() {
-	for req := range t.requestQueue {
-		message := req.message
-		response_ch := req.response_ch
+// runRequestQueue services the UDPClient request queue
+func (c *UDPClient) runRequestQueue() error {
 
-		msg, err := t.execRequest(message)
+	for {
+		select {
+		case <-c.t.Dying():
+			return nil
+		case req := <-c.requestQueue:
+			message := req.message
+			responseCh := req.responseCh
 
-		response_ch <- response{msg, err}
+			msg, err := c.execRequest(message)
+
+			responseCh <- response{msg, err}
+		}
+
 	}
 }
 
 // execRequest will send a UDP message to Riemann
-func (t *UdpClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
-	err := t.conn.SetDeadline(time.Now().Add(t.timeout))
+func (c *UDPClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
+	err := c.conn.SetDeadline(time.Now().Add(c.timeout))
 	if err != nil {
 		return nil, err
 	}
@@ -76,10 +91,10 @@ func (t *UdpClient) execRequest(message *proto.Msg) (*proto.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(data) > MAX_UDP_SIZE {
+	if len(data) > MaxUDPSize {
 		return nil, fmt.Errorf("unable to send message, too large for udp")
 	}
-	if _, err = t.conn.Write(data); err != nil {
+	if _, err = c.conn.Write(data); err != nil {
 		return nil, err
 	}
 	return nil, nil
