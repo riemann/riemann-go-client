@@ -1,5 +1,9 @@
 # Change Log
 
+## Release v0.5.0
+
+A huge refactoring has been done in this release. This version is not backward compatible with the previous one.
+
 ## Release v0.4.0
 
 ### Bugfixes
