@@ -1,0 +1,52 @@
+version: 2 # use CircleCI 2.0
+shared: &shared
+  working_directory: /go/src/github.com/riemann/riemann-go-client
+  environment: # environment variables for the build itself
+    TEST_RESULTS: /tmp/test-results # path to where test results will be saved
+    GO111MODULES: on
+    GOLANGCI_LINT_VERSION: 1.15.0
+
+  steps: # steps that comprise the `build` job
+    - checkout # check out source code to working directory
+    - run: mkdir -p $TEST_RESULTS # create the test results directory
+    - run: sudo apt-get update && sudo apt-get -qy install default-jdk
+    - restore_cache: # restores saved cache if no changes are detected since last run
+        key: v1-pkg-cache
+    - run: GO111MODULE=on go get github.com/jstemmer/go-junit-report
+    - run: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $GOPATH/bin v${GOLANGCI_LINT_VERSION}
+    - run: GO111MODULE=on go mod vendor
+    - run:
+        name: Run unit tests
+        # Store the results of our tests in the $TEST_RESULTS directory
+        command: |
+          trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
+          make test | tee ${TEST_RESULTS}/go-test.out
+    - run: make integ
+    - run: golangci-lint run .
+    - run: make # pull and build dependencies for the project
+    - save_cache: # Store cache in the /go/pkg directory
+        key: v1-pkg-cache
+        paths:
+          - "/go/pkg"
+    - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+        path: /tmp/test-results
+        destination: raw-test-output
+    - store_test_results: 
+        path: /tmp/test-results
+      
+jobs:
+  go1-11:
+    docker: # run the steps with Docker
+      - image: circleci/golang:1.11
+    <<: *shared
+  go1-12:
+    docker: # run the steps with Docker
+      - image: circleci/golang:1.12
+    <<: *shared
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - go1-11
+      - go1-12

@@ -18,7 +18,7 @@ We've also renamed the client to `riemanngo` instead of `goryman` to make its pu
 
 ## Build Status
 
-[![Build Status](https://travis-ci.org/riemann/riemann-go-client.svg?branch=master)](https://travis-ci.org/riemann/riemann-go-client)
+[![CircleCI](https://circleci.com/gh/riemann/riemann-go-client.svg?style=svg)](https://circleci.com/gh/riemann/riemann-go-client)
 
 ## Installation
 
