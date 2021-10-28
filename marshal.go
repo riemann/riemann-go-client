@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
-	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
+	pb "google.golang.org/protobuf/proto"
 )
 
 // EventToProtocolBuffer convert an event to a protobuf Event
