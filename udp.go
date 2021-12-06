@@ -5,8 +5,8 @@ import (
 	"net"
 	"time"
 
-	pb "github.com/golang/protobuf/proto"
 	"github.com/riemann/riemann-go-client/proto"
+	pb "google.golang.org/protobuf/proto"
 	"gopkg.in/tomb.v2"
 )
 
